@@ -20,13 +20,18 @@ imageData, labelData = tfds.load("mnist", split=['train[:1500]'], batch_size=-1,
 #remove unnecessary channel dimension (axis 3)
 imageData = tf.squeeze(imageData, axis=3) 
 
-def visualize(num): #make graphics of the first (num) pictures in the visualization set 
+def visualizeMNIST(data, num): #make graphics of the first (num) pictures in the visualization set 
 	for i in range(num):
 		plt.subplot(3,3,1+i) #add to a 3x3 subplot with graph index 1+i 
 		plt.axis('off') #no axis
-		plt.imshow(imageData[i], cmap='gray') #draw graphs onto plot
+		plt.imshow(data[i], cmap='gray') #draw graphs onto plot
 		plt.title(f"Label: {labelData[i]}") #label each graph
 		plt.subplots_adjust(hspace=.5) #space each graph
 	plt.show() #display graph
 
-visualize(9)
+def histogram(data): #make a histogram of the amount of inputted dataset
+	sns.countplot(x=data.numpy())
+	plt.xlabel("Number")
+	plt.title("Data Distribution")
+	plt.show()
+
