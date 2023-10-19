@@ -41,3 +41,25 @@ def preprocess(imgData, lbls): #reshape MNIST data so it can be processed by the
 	return imgData, lbls
 
 trainData, valData = trainData.map(preprocess), valData.map(preprocess) #apply preprocessing functions to the training and validation iamge and label sets
+
+def xavier_init(shape): #creates a weight matrix of size shape x shape initialized by random values from the xavier initialization
+	inputDim, outputDim = shape 
+	xavierLim = tf.sqrt(6.)/tf.sqrt(tf.cast(inputDim + outputDim, tf.float32)) #define the Xavier initialization with input and output dimensions
+	weightVals = tf.random.uniform(shape=(inputDim, outputDim), minval=-xavierLim, maxval=xavierLim, seed=88) #create the random weight matrix using xavier initialization
+	return weightVals 
+
+class DenseLayer(tf.Module): 
+	def __init__(self, out_dim, weight_init=xavier_init, activation=tf.identity): #redefines DenseLayer's init to have a default weight_init of xavierInit and an identity activation function which just returns the same tensor that is inputted
+		self.out_dim = out_dim 
+		self.weight_init = weight_init #defaults to xavierInit
+		self.activation = activation #defaults to identity activation function
+		self.built = False
+
+	def __call__(self, inputData): #when DenseLayer is called as a method
+		if not self.built: #if the DenseLayer is not previously built
+			self.in_dim = inputData.shape[1] #base input dimension based on inputted data
+			self.w = tf.Variable(self.weight_init(shape=(self.in_dim, self.out_dim))) #create the weight matrix in the layer
+			self.b = tf.Variable(tf.zeros(shape=(self.out_dim))) #create a bias matrix filled with zeros 
+			self.built = True #layer building is complete
+		z = tf.add(tf.matmul(inputData, self.w), self.b)
+		return self.activation(z)
