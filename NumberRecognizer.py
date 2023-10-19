@@ -20,11 +20,11 @@ imageData, labelData = tfds.load("mnist", split=['train[:1500]'], batch_size=-1,
 #remove unnecessary channel dimension (axis 3)
 imageData = tf.squeeze(imageData, axis=3) 
 
-def visualizeMNIST(data, num): #make graphics of the first (num) pictures in the visualization set 
+def visualizeMNIST(imgData, num): #make graphics of the first (num) pictures in the visualization set 
 	for i in range(num):
 		plt.subplot(3,3,1+i) #add to a 3x3 subplot with graph index 1+i 
 		plt.axis('off') #no axis
-		plt.imshow(data[i], cmap='gray') #draw graphs onto plot
+		plt.imshow(imgData[i], cmap='gray') #draw graphs onto plot
 		plt.title(f"Label: {labelData[i]}") #label each graph
 		plt.subplots_adjust(hspace=.5) #space each graph
 	plt.show() #display graph
@@ -35,3 +35,9 @@ def histogram(data): #make a histogram of the amount of inputted dataset
 	plt.title("Data Distribution")
 	plt.show()
 
+def preprocess(imgData, lbls): #reshape MNIST data so it can be processed by the neural net 
+	imgData = tf.reshape(imgData, shape=[-1, 784]) #reshape to flatten the data so that the neural net can take a 1x784 input 
+	imgData = imgData/255 # make the color values fit between [0, 1] instead of the color values of [0,255]
+	return imgData, lbls
+
+trainData, valData = trainData.map(preprocess), valData.map(preprocess) #apply preprocessing functions to the training and validation iamge and label sets
