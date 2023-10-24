@@ -61,5 +61,16 @@ class DenseLayer(tf.Module):
 			self.w = tf.Variable(self.weight_init(shape=(self.in_dim, self.out_dim))) #create the weight matrix in the layer
 			self.b = tf.Variable(tf.zeros(shape=(self.out_dim))) #create a bias matrix filled with zeros 
 			self.built = True #layer building is complete
-		z = tf.add(tf.matmul(inputData, self.w), self.b)
-		return self.activation(z)
+		z = tf.add(tf.matmul(inputData, self.w), self.b) #multiply the input data by the weight matrix and then add the bias matrix
+		return self.activation(z) #return the modified matrix put through the activation function 
+
+class MLP(tf.Module): #create multilayer perceptron model that will excecute layers in order
+	def __init__(self, layers):
+		self.layers = layers
+
+	@tf.function #declare __call__ as a tensorflow function to improve performance
+	def __call__(self, inputData, preds=False): #preds=False disables predictions being printed after every layer
+		for layer in self.layers: #for every layer...
+			inputData = layer(inputData) #pass the inputted data through the layer
+		return inputData #return final result 
+
