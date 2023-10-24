@@ -74,3 +74,15 @@ class MLP(tf.Module): #create multilayer perceptron model that will excecute lay
 			inputData = layer(inputData) #pass the inputted data through the layer
 		return inputData #return final result 
 
+#For this multilayer perceptron, we are using the following archeitechture:
+#Forward Pass: ReLU(784x700) x ReLU(700x500) x Softmax(500x10)
+#784 (number of pixels), 700 (hidden layer 1), 500 (hidden layer 2), 10 (possible outcomes)
+
+hiddenL1Size = 700
+hiddenL2Size = 500
+outputSize = 10
+
+mlp_model = MLP([ #initialize a multilayer perceptron with two hidden layers and one output layer
+	DenseLayer(out_dim=hiddenL1Size, activation=tf.nn.relu), #first hidden layer with output size 700 and a ReLU activation function
+	DenseLayer(out_dim=hiddenL2Size, activation=tf.nn.relu), #second hidden layer with output size 500 and a ReLU activation function
+	DenseLayer(out_dim=outputSize)]) # output layer with output size 10
