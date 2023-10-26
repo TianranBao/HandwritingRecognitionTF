@@ -86,3 +86,26 @@ mlp_model = MLP([ #initialize a multilayer perceptron with two hidden layers and
 	DenseLayer(out_dim=hiddenL1Size, activation=tf.nn.relu), #first hidden layer with output size 700 and a ReLU activation function
 	DenseLayer(out_dim=hiddenL2Size, activation=tf.nn.relu), #second hidden layer with output size 500 and a ReLU activation function
 	DenseLayer(out_dim=outputSize)]) # output layer with output size 10
+
+def cross_entropy_loss(y_pred, y): #calculate cross entropy loss 
+	#pass simplified true labels and prediction through a softmax function followed by a cross entropy calculation
+	sparse_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=y_pred) 
+ 	return tf.reduce_mean(sparse_ce) #return the mean of the cross entropy values
+
+def accuracy(y_pred, y): #compute accuracy of the model's predictions
+	#take the predictions, turn them into a probability distribution using softmax, then use argmax to find the highest probability prediction
+	class_preds = tf.argmax(tf.nn.softmax(y_pred), axis=1) 
+	is_equal = tf.equal(y, class_preds) #checks if label and prediction are equal
+	return tf.reduce_mean(tf.cast(is_equal, tf.float32)) #return accuracy of the prediction from 0.0 to 1.0 by converting tensorflow's boolean to a float value
+
+class Adam: #utilize TensorFlow's Adaptive Moment Estimation optimizer for faster convergence
+
+	def __init__(self, learning_rate =1e-3, beta_1=0.9, beta_2=0.999, ep=1e-7):
+		self.beta_1 = beta_1 #weights past gradients' contributions to the current gradient
+		self.beta_2 = beta_2 #weights past squared gradients' contributions to the current gradient
+		self.learning_rate = learning_rate #determines step size
+		self.ep = ep #small value added to denominator to prevent division by zero
+		self.t = 1. #keep track of how many updates are done 
+		self.v_dvar, self.s_dvar = [], [] #stores first and second moment estimates of the gradient
+		self.built = False #is the optimizer initialized? 
+
