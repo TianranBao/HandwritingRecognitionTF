@@ -90,7 +90,7 @@ mlp_model = MLP([ #initialize a multilayer perceptron with two hidden layers and
 def cross_entropy_loss(y_pred, y): #calculate cross entropy loss 
 	#pass simplified true labels and prediction through a softmax function followed by a cross entropy calculation
 	sparse_ce = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y, logits=y_pred) 
- 	return tf.reduce_mean(sparse_ce) #return the mean of the cross entropy values
+	return tf.reduce_mean(sparse_ce) #return the mean of the cross entropy values
 
 def accuracy(y_pred, y): #compute accuracy of the model's predictions
 	#take the predictions, turn them into a probability distribution using softmax, then use argmax to find the highest probability prediction
@@ -108,4 +108,28 @@ class Adam: #utilize TensorFlow's Adaptive Moment Estimation optimizer for faste
 		self.t = 1. #keep track of how many updates are done 
 		self.v_dvar, self.s_dvar = [], [] #stores first and second moment estimates of the gradient
 		self.built = False #is the optimizer initialized? 
+
+	def apply_gradients(self, grads, vars): #takes gradients and existing weights to further optimize the learning rate of the network  
+		if not self.built: #build optimizer on first run
+			for var in vars: 
+				v = tf.Variable(tf.zeros(shape=var.shape)) #create zero tensor and assign it to the first moment variable
+				s = tf.Variable(tf.zeros(shape=var.shape)) #create zero tensor and assign it to the second moment variable
+				self.v_dvar.append(v) #add first moment variable to the list of first moment variable
+				self.s_dvar.append(s) #add second moment variable to the list of second moment variable
+			self.built = True #build complete
+
+		#apply gradients to model variables
+		for i, (d_var, var) in enumerate(zip(grads, vars)): #for each pair of gradient and variable tensor inputs
+			#update first moment estimate by multiplying first moment estimate by first moment exponential decay rate + (current first moment gradient)*(1- first moment decay rate)
+			self.v_dvar[i].assign(self.beta_1*self.v_dvar[i] + (1-self.beta_1)*d_var) 
+			#update second moment estimate by multiplying second moment estimate by second moment exponential decay rate + (1- second moment decay rate)*(current second moment gradient)^2
+			self.s_dvar[i].assign(self.beta_2*self.s_dvar[i] + (1-self.beta_2)*tf.square(d_var))
+			#scale first moment estimate by dividing first moment estimate by 1 - (first moment exponential decay rate)^(timestep)
+			v_dvar_bc = self.v_dvar[i]/(1-(self.beta_1**self.t))
+			#scale second moment estimate by dividing second moment estimate by 1 - (second moment exponential decay rate)^(timestep)
+			s_dvar_bc = self.s_dvar[i]/(1-(self.beta_2**self.t)) 
+			#control size step by multiplying learning rate by bias corrected (first moment estimate)/(sqrt(bias corrected second moment estimate) + epsilon)
+			var.assign_sub(self.learning_rate*(v_dvar_bc/(tf.sqrt(s_dvar_bc) + self.ep)))
+		self.t += 1 #increase timstep
+		return 
 
