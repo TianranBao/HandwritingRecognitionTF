@@ -133,3 +133,17 @@ class Adam: #utilize TensorFlow's Adaptive Moment Estimation optimizer for faste
 		self.t += 1 #increase timstep
 		return 
 
+def train_step(x_batch, y_batch, loss, acc, model, optimizer): #define training loop 
+	with tf.GradientTape() as tape: #use tensorflow gradient tape to "watch" operations 
+		y_pred = model(x_batch) #calculate predicted labels
+		batch_loss = loss(y_pred, y_batch) #compute loss between predicted and actual labels
+	batch_acc = acc(y_pred, y_batch) #calculate the accuracy of the predicted and true labels
+	grads = tape.gradient(batch_loss, model.variables) #compute gradient of the batch loss with respect to the model's variables'
+	optimizer.apply_gradients(grads, model.variables) #update model parameters based on model variables and loss gradient
+	return batch_loss, batch_acc #return loss and accuracy for this batch
+
+def val_step(x_batch, y_batch, loss, acc, model): #calculate performance of model
+	y_pred = model(x_batch) #calculate predicted labels
+	batch_loss = loss(y_pred, y_batch) #calculate the loss of this batch
+	batch_acc = acc(y_pred, y_batch) #calculate the accuracy of this model
+	return batch_loss, batch_acc #return loss and accuracy for this batch
