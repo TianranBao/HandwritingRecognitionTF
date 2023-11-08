@@ -178,3 +178,26 @@ def train_model(mlp, train_data, val_data, loss, acc, optimizer, epochs): #input
 
 #train the model for 10 epochs using a multilayer perceptron model with a training and validation data of size 128 images using a cross entropy loss function and tensorflow's Adam optimizer
 train_losses, train_accs, val_losses, val_accs = train_model(mlp_model, trainData, valData, loss=cross_entropy_loss, acc=accuracy, optimizer=Adam(), epochs=10)
+
+class ExportModule(tf.Module):
+	def __init__(self, model, preprocess, class_pred): #define export initialization
+		self.model = model #type of model that's being exported
+		self.preprocess = preprocess #preprocess the input before passing it into the model
+		self.class_pred = class_pred #method that performs classification task
+
+	@tf.function(input_signature=[tf.TensorSpec(shape=[None, None, None, None], dtype=tf.uint8)]) #define as a tensorflow function with an input of a 4D tensor of 8 bit integers
+	def __call__(self, x): #define export call code 
+		x = self.preprocess(x) #preprocess data 
+		y = self.model(x) #pass preprocessed data through the model 
+		y = self.class_pred(y) #pass model output through a prediction method
+		return y #output label prediction
+
+	def preprocess_test(x): #process raw input from MNIST 
+		x = tf.reshape(x, shape=[-1, 784]) #reshape the input tensor into an arbitrary batch size and size of 784 (28x28 pixel input)
+		x = x/255 #normalize shades of color between 0 and 1 
+		return x #return preprocessed data 
+
+	def class_pred_test(y): #create predictions from neural network output
+		return tf.argmax(tf.nn.softmax(y), axis=1) #create probability distribution from inputted data and return the highest probability label
+
+		
