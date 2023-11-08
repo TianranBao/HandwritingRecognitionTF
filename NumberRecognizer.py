@@ -148,7 +148,7 @@ def val_step(x_batch, y_batch, loss, acc, model): #calculate performance of mode
 	batch_acc = acc(y_pred, y_batch) #calculate the accuracy of this model
 	return batch_loss, batch_acc #return loss and accuracy for this batch
 
-def train_model(mlp, train_data, val_data, loss, acc, optimizer, ep): #inputs: neural network model, training data, validation data, loss function, accuracy function, and # of epochs to train for
+def train_model(mlp, train_data, val_data, loss, acc, optimizer, epochs): #inputs: neural network model, training data, validation data, loss function, accuracy function, and # of epochs to train for
 	train_losses, train_accs = [], [] #store training losses and accuracies
 	val_losses, val_accs = [], [] #store validation losses and accuracies 
 	for epoch in range(epochs): #train for x epochs
@@ -176,3 +176,5 @@ def train_model(mlp, train_data, val_data, loss, acc, optimizer, ep): #inputs: n
 		print(f"Validation loss: {val_loss:.3f}, Validation accuracy: {val_acc:.3f}")
 	return train_losses, train_accs, val_losses, val_accs #return training losses, accuracies and validation losses, accuracies 
 
+#train the model for 10 epochs using a multilayer perceptron model with a training and validation data of size 128 images using a cross entropy loss function and tensorflow's Adam optimizer
+train_losses, train_accs, val_losses, val_accs = train_model(mlp_model, trainData, valData, loss=cross_entropy_loss, acc=accuracy, optimizer=Adam(), epochs=10)
