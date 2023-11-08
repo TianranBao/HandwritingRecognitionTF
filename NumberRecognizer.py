@@ -147,3 +147,32 @@ def val_step(x_batch, y_batch, loss, acc, model): #calculate performance of mode
 	batch_loss = loss(y_pred, y_batch) #calculate the loss of this batch
 	batch_acc = acc(y_pred, y_batch) #calculate the accuracy of this model
 	return batch_loss, batch_acc #return loss and accuracy for this batch
+
+def train_model(mlp, train_data, val_data, loss, acc, optimizer, ep): #inputs: neural network model, training data, validation data, loss function, accuracy function, and # of epochs to train for
+	train_losses, train_accs = [], [] #store training losses and accuracies
+	val_losses, val_accs = [], [] #store validation losses and accuracies 
+	for epoch in range(epochs): #train for x epochs
+		batch_losses_train, batch_accs_train = [], [] #track loss and accuracy for this batch of training data
+		batch_losses_val, batch_accs_val = [], [] #track loss and accuracy for this batch of validation data 
+
+		for x_batch, y_batch in train_data: #for input data and labels in inputted training data
+			batch_loss, batch_acc = train_step(x_batch, y_batch, loss, acc, mlp, optimizer) #excecute the training step with given inputs -> updates model variables using calculated gradients
+			batch_losses_train.append(batch_loss) #add this batch's losses to batch loss list
+			batch_accs_train.append(batch_acc) #add this batch's accuracy to batch accuracy list
+
+		for x_batch, y_batch in val_data: #for input data and labels in inputted validation data
+			batch_loss, batch_acc = val_step(x_batch, y_batch, loss, acc, mlp)
+			batch_losses_val.append(batch_loss)
+			batch_accs_val.append(batch_acc)
+
+		train_loss, train_acc = tf.reduce_mean(batch_losses_train), tf.reduce_mean(batch_accs_train) #take the average of the training loss and accuracy
+		val_loss, val_acc = tf.reduce_mean(batch_losses_val), tf.reduce_mean(batch_accs_val) #take the average of the validation loss and accuracy
+		train_losses.append(train_loss) #record average training loss for this epoch
+		train_accs.append(train_acc) #record average training accuracy for this epoch
+		val_losses.append(val_loss) #record average validation loss for this epoch
+		val_accs.append(val_acc) #record average validation accuracy for this epoch
+		print(f"Epoch: {epoch}")
+		print(f"Training loss: {train_loss:.3f}, Training accuracy: {train_acc:.3f}")
+		print(f"Validation loss: {val_loss:.3f}, Validation accuracy: {val_acc:.3f}")
+	return train_losses, train_accs, val_losses, val_accs #return training losses, accuracies and validation losses, accuracies 
+
