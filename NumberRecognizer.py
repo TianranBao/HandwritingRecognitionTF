@@ -192,12 +192,16 @@ class ExportModule(tf.Module):
 		y = self.class_pred(y) #pass model output through a prediction method
 		return y #output label prediction
 
-	def preprocess_test(x): #process raw input from MNIST 
+def preprocess_test(x): #process raw input from MNIST 
 		x = tf.reshape(x, shape=[-1, 784]) #reshape the input tensor into an arbitrary batch size and size of 784 (28x28 pixel input)
 		x = x/255 #normalize shades of color between 0 and 1 
 		return x #return preprocessed data 
 
-	def class_pred_test(y): #create predictions from neural network output
+def class_pred_test(y): #create predictions from neural network output
 		return tf.argmax(tf.nn.softmax(y), axis=1) #create probability distribution from inputted data and return the highest probability label
 
-		
+mlp_model_export = ExportModule(model=mlp_model, preprocess=preprocess_test, class_pred=class_pred_test) #run exportmodel method with multilayerperceptron model, preprocessing for MNIST dataset, and class prediction
+
+models = tempfile.mkdtemp() #create a temporary directory 
+save_path = os.path.join(models, 'mlp_model_export') #create save path for multilayer perceptron model
+tf.saved_model.save(mlp_model_export, save_path) #export as a SavedModel file
